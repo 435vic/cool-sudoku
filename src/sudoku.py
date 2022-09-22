@@ -1,35 +1,5 @@
 from characters import SUDOKU_FONTS
 
-
-# ┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-#  
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
- 
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
-# ┃   │   │   ┃   │   │   ┃   │   │   ┃
-
-# ┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛
-
 class Sudoku():
     """Tablero de Sudoku."""
     def __init__(self):
@@ -37,7 +7,7 @@ class Sudoku():
 
     def render(self):
         """Retorna un string con el tablero de sudoku."""
-        boxchars = SUDOKU_FONTS['basic']
+        boxchars = SUDOKU_FONTS['double']
         # El tablero está compuesto de líneas mayores y menores. Las mayores suceden cada 3 celdas
         # y en los bordes externos, y las menores en el resto de las líneas.
         grid = []
@@ -67,14 +37,9 @@ class Sudoku():
 
                 ###### línea horizontal menor ######
                 else:
-                    if j % 3 == 0:
-                        # Si esta columna está en una línea vertical mayor, ┠ si es la primera o ╂ si no
-                        row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][1]
-                        row[1] += boxchars['vline'][1]
-                    else:
-                        row[0] += boxchars['cross'][0]
-                        row[1] += boxchars['vline'][0]
-                    
+                    # Si esta columna está en una línea vertical mayor, ┠ si es la primera o ╂ si no
+                    row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][j%3 == 0]
+                    row[1] += boxchars['vline'][j % 3 == 0]
                     row[0] += boxchars['hline'][0]*3
                     row[1] += ' '*3
             
@@ -83,6 +48,11 @@ class Sudoku():
 
             grid.extend(row) 
 
+        final_row = boxchars['llcorner']+boxchars['hline'][1]*3 \
+            + ''.join([boxchars['huline'][(j+1)%3==0]+boxchars['hline'][1]*3 for j in range(8)]) \
+            + boxchars['lrcorner']
+
+        grid.append(final_row)
         print('\n'.join(grid))
 
 

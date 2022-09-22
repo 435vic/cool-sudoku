@@ -1,29 +1,53 @@
 # Caracteres que representan gráficamente el tablero de sudoku.
 # Esquina superior izquierda, esquina superior derecha, esquina inferior izquierda, esquina inferior derecha, linea horizontal, linea vertical
+
+# ┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
+# ┃   │   │   ┃   │   │   ┃   │   │   ┃
+# ┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛
+
+# Cada caracter necesario para renderizar el tablero.
+# Contiene versiones marcadas y no marcadas, para indicar la división entre cuadrículas de 3 por 3.
 SUDOKU_FONTS = {
     'basic': {
-        'vline': ['│', '┃'],
-        'hline': ['─', '━'],
-        'ulcorner': '┏',
-        'urcorner': '┓',
-        'llcorner': '┗',
-        'lrcorner': '┛',
-        'huline': ['┷', '┻'],
-        'hdline': ['┯', '┳'],
-        'vlline': ['┨', '┫'],
-        'vrline': ['┠', '┣'],
-        'cross': ['┼', '╂', '┿', '╋']
+        'ulcorner': '┏', # Upper left corner
+        'urcorner': '┓', # Upper right corner
+        'llcorner': '┗', # Lower left corner
+        'lrcorner': '┛', # Lower right corner
+        'vline': ['│', '┃'], # Vertical line
+        'hline': ['─', '━'], # Horizontal line
+        'huline': ['┷', '┻'], # Horizontal (and) up line
+        'hdline': ['┯', '┳'], # Horizontal (and) down line
+        'vlline': ['┨', '┫'], # Vertical (and) left line
+        'vrline': ['┠', '┣'], # Vertical (and) right line
+        'cross': ['┼', '╂', '┿', '╋'] # Cross
     },
     'double': {
-        'vline': '║',
-        'hline': '═',
         'ulcorner': '╔',
         'urcorner': '╗',
         'llcorner': '╚',
         'lrcorner': '╝',
-        'huline': '╩',
-        'hdline': '╦',
-        'vlline': '╣',
-        'vrline': '╠'
+        'vline': ['│', '║'],
+        'hline': ['─', '═'],
+        'huline': ['╧', '╩'],
+        'hdline': ['╤', '╦'],
+        'vlline': ['╢', '╣'],
+        'vrline': ['╟', '╠'],
+        'cross': ['┼', '╫', '╪', '╬']
     }
 }
