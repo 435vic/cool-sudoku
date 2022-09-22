@@ -1,6 +1,7 @@
-# Caracteres que representan gráficamente el tablero de sudoku.
-# Esquina superior izquierda, esquina superior derecha, esquina inferior izquierda, esquina inferior derecha, linea horizontal, linea vertical
+"""Módulo de utilidad que proporciona caracteres para la renderización del tablero del Sudoku.
+Existen dos opciones: la básica y la doble, la cual cambia el estilo de las líneas."""
 
+# Caracteres que representan gráficamente el tablero de sudoku.
 # ┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓
 # ┃   │   │   ┃   │   │   ┃   │   │   ┃
 # ┠───┼───┼───╂───┼───┼───╂───┼───┼───┫
