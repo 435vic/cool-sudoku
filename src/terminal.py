@@ -1,87 +1,90 @@
-import platform, os
+from time import sleep
+from blessed import Terminal
 import sys
 
-def clear():
-    if platform.system() == 'Windows':
-        os.system('cls')
-    else:
-        os.system('clear')
+from blessed import Terminal
+import sys
+
+term = Terminal()
+
+def get_terminal():
+    return term
+
+class Select:
+    """Menú de selección.
     
-def get_terminal_size():
-    try:
-        size = os.get_terminal_size()
-        return size
-    except OSError:
-        return None
-
-def terminal_setup():
-    """Preparar consola para el programa."""
-    pass
-
-class Position:
-    """Clase de utilidad que representa la posición de un cursor, en columnas y filas.
-    
-    ## Atributos
-    - row (int): La fila del cursor.
-    - col (int): La columna del cursor.
-    """
-    def __init__(self, col=0, row=0):
-        self.row = row
-        self.col = col
-
-# Inspirado por Inquire, una librería de Rust (copyright Mikael Mello) https://github.com/mikaelmello/inquire
-class Viewport:
-    """Representa un búfer de texto en la consola, el cual puede ser manipulado.
-    
-    Consiste de un búfer de texto y un cursor, el cual puede ser manipulado y renderizado a demanda.
-    El cursor comienza en la posición (0,0), y el búfer tiene un tamaño inicial de cero.
-
-    ## Atributos
-    - buffer (str): El búfer de texto del viewport.
-    - cursor (Position): La posición del cursor.
-    - stream_in (TextIOBase): El stream de datos de donde conseguir datos (default: stdin)
-    - stream_out (TextIOBase): El stream de datos para usar para la salida de datos (default: stdout)
+    Argumentos:
+    options (list(str)): Lista de opciones.
     """
 
-    def __init__(self, stream_in=sys.stdin, stream_out=sys.stdout):
-        self._buffer = ""
-        self.cursor = Position()
-        self.end_position = Position()
-        self.terminal_size = get_terminal_size()
-        self.sin = stream_in
-        self.sout = stream_out
-    
-    def write(self, text):
-        """Escribe el texto proporcionado al stream de salida especificado."""
-        self._buffer.push(text)
-        self.sin.write(text)
+    def __init__(self, options):
+        self.options = options
+        self.index = 0
 
-    def update_position(self):
-        """Actualiza el cursor y la posición final interna para que sea el final del texto.
+    def render(self, selection=0):
+        # Imprimir las opciones, añadiendo el cursor (>) en caso de que sea la seleccionada.
+        for (idx, option) in enumerate(self.options):
+            cursor = '   ' if not idx == selection else term.aqua + ' > '
+            print(cursor + option + term.normal)
 
-        Esto toma en cuenta las líneas y las dimensiones físicas de la consola.
-        """
-        # Inicilizamos una posición en 0,0
-        pos = Position()
+    def render_help_message(self):
+        """Imprime un mensaje de guía con los controles para el menú."""
+        msg = "[⬆⬇ para seleccionar | esc para cancelar | enter para confirmar]"
+        print('\n' + term.gray + msg + term.normal)
 
-        # Hacemos un bucle sobre los caracteres del búfer, actualizando la cursor cuando sea necesario.
-        for (idx, c) in enumerate(self._buffer):
-            # Nueva línea, cambiamos de fila y reseteamos la columna a 0
-            if c == '\n':
-                pos.row += 1
-                pos.col = 0
-            else:
-                chars_left = self.terminal_size.columns - pos.col
-                # Si excedemos la longitud de la consola, pasar a la siguiente fila
-                if chars_left < 1:
-                    pos.row += 1
-                    pos.col = 0
-                else:
-                    pos.col += 1
+    def set_prompt(self, text):
+        self._text = text
+        return self
+
+    def prompt(self, text='', erase_after_use=False):
+        """Renderiza la lista de opciones con un prompt especificado.
         
-        self.cursor = pos
-        self.end_position = pos
+        Argumentos:
+        text (str): El prompt.
+        erase_after_use (boolean): Si después de elegir la opción, dejar la línea con la selección (False) o eliminarla (True)
+        
+        Retorna: La opción seleccionada."""
+        # Preparar la consola para recibir teclas individuales, y esconder el cursor
+        with term.cbreak(), term.hidden_cursor():
+            if self._text:
+                text = self._text
+            print(text)
+            index = 0
+            self.render(index)
+            self.render_help_message()
 
-    
-    
+            while True:
+                with term.location():
+                    # Regresar al principio de la lista (tomando en cuenta el mensaje de ayuda)
+                    print(term.move_up(len(self.options)+2), end='')
+                    self.render(index)
 
+                key = term.inkey(timeout=4)
+                # mover el cursor, regresando al principio o al final si se excede la lista.
+                if key.name == 'KEY_UP':
+                    index = (index - 1) % len(self.options)
+                elif key.name == 'KEY_DOWN':
+                    index = (index + 1) % len(self.options)
+                elif key.name == 'KEY_ENTER':
+                    # Regresar al principio y reemplazar todo para sólo dejar la selección
+                    print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
+                    if not erase_after_use:
+                        print(term.move_up() + term.move_right(len(text)) + term.aqua + self.options[index] + term.normal)
+                    return self.options[index]
+                elif key.name == 'KEY_ESCAPE':
+                    # Regresar al principio y reemplazar todo para sólo dejar la selección
+                    print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
+                    if not erase_after_use:
+                        print(term.move_up() + term.move_right(len(text)) + term.red + 'Cancelado' + term.normal)
+                    return None
+
+# term = Terminal()
+
+# with term.cbreak(), term.hidden_cursor():
+#     print("Testing!")
+#     print("Testing!")
+#     print("(press q to quit)", end='')
+#     sys.stdout.flush()
+#     while (val := term.inkey()).lower() != 'q':
+#         pass
+#     print((term.clear_bol+term.move_up)*3+"\n")
