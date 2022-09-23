@@ -145,6 +145,7 @@ class Sudoku():
     def render(self):
         """Retorna un string con el tablero de sudoku."""
         boxchars = SUDOKU_FONTS['basic']
+        numchars = CHAR_FONTS['alpha']
         # La lógica para renderizar esta cuadrícula inspirada en este repositorio: https://github.com/thisisparker/cursewords
 
         # El tablero está compuesto de líneas mayores y menores. Las mayores suceden cada 3 celdas
@@ -178,7 +179,8 @@ class Sudoku():
                     row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][j%self.grade == 0]
                     row[0] += boxchars['hline'][0]*3
                 # La segunda fila tiene líneas verticales y espacios únicamente
-                row[1] += boxchars['vline'][j % self.grade == 0] + f' {self.content[i][j] or " "} '
+                n = self.content[i][j]
+                row[1] += boxchars['vline'][j % self.grade == 0] + f' {numchars[n] or " "} '
 
             # Añadir la última columna (la extra)
             row[0] += boxchars['urcorner'] if i == 0 else boxchars['vlline'][i%self.grade == 0]            
