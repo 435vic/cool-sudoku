@@ -14,16 +14,18 @@ class Select:
     """Menú de selección.
     
     Argumentos:
-    options (list(str)): Lista de opciones.
+    options (dict(str, str)): Diccionario de opciones. La llave representa una identificación, y el valor lo que se
+    mostrará en esa opción.
     """
 
-    def __init__(self, options):
+    def __init__(self, options: dict):
         self.options = options
         self.index = 0
+        self._text = None
 
     def render(self, selection=0):
         # Imprimir las opciones, añadiendo el cursor (>) en caso de que sea la seleccionada.
-        for (idx, option) in enumerate(self.options):
+        for (idx, option) in enumerate(self.options.values()):
             cursor = '   ' if not idx == selection else term.aqua + ' > '
             print(cursor + option + term.normal)
 
@@ -36,11 +38,12 @@ class Select:
         self._text = text
         return self
 
-    def prompt(self, text='', erase_after_use=False):
+    def prompt(self, text='', default=0, erase_after_use=False):
         """Renderiza la lista de opciones con un prompt especificado.
         
         Argumentos:
         text (str): El prompt.
+        default (int): El item que estará seleccionado al inicio (default: 0)
         erase_after_use (boolean): Si después de elegir la opción, dejar la línea con la selección (False) o eliminarla (True)
         
         Retorna: La opción seleccionada."""
@@ -49,7 +52,7 @@ class Select:
             if self._text:
                 text = self._text
             print(text)
-            index = 0
+            index = default
             self.render(index)
             self.render_help_message()
 
@@ -69,8 +72,8 @@ class Select:
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
                     print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
                     if not erase_after_use:
-                        print(term.move_up() + term.move_right(len(text)) + term.aqua + self.options[index] + term.normal)
-                    return self.options[index]
+                        print(term.move_up() + term.move_right(len(text)) + term.aqua + list(self.options.values())[index] + term.normal)
+                    return list(self.options.keys())[index]
                 elif key.name == 'KEY_ESCAPE':
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
                     print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')

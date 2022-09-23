@@ -1,15 +1,21 @@
 from characters import SUDOKU_FONTS, CHAR_FONTS
-from random import shuffle
+from random import shuffle, random
+from utils import interpolate
 
 class Sudoku():
     """Tablero de Sudoku."""
-    def __init__(self, grade=3, callback=lambda a,b,c: ()):
+    def __init__(self, grade=3, difficulty=0, callback=lambda a,b,c: ()):
         # 'nivel' del sudoku. Entre más alto, más grande y difícil el Sudoku.
         self.grade = grade
         # Tamaño total del sudoku, en celdas.
         self.size = self.grade**2
         # Contenido del sudoku, una matrix del tamaño self.size, con números del 0 al 9. 0 representa una celda vacía.
         self.content = [[0 for _ in range(self.size)] for _ in range(self.size)]
+        # Los números predeterminados del sudoku, no se pueden cambiar
+        self.given = [[0 for _ in range(self.size)] for _ in range(self.size)]
+        # La dificultad del sudoku, valor de 0 a 1, representando el porcentaje de celdas que estarán vacías al empezar.
+        self.difficulty = interpolate(difficulty, .6, .74)
+        # Función que se llama cada vez que se asigna una celda
         self.callback = callback
 
     def set_cell(self, col, row, n):
@@ -46,6 +52,15 @@ class Sudoku():
 
         # Paso 2: Resolver!!!
         self.recursive_solve(self.grade, 0)
+
+        # Paso 3: Ahora que tenemos un tablero válido, podemos quitar números.
+        for i in range(self.size):
+            for j in range(self.size):
+                if random() < self.difficulty:
+                    self.content[i][j] = 0
+                
+                # Configuramos los números iniciales
+                self.given[i][j] = self.content[i][j]
         
     
     def recursive_solve(self, col, row):
@@ -65,7 +80,7 @@ class Sudoku():
                     return True
 
         # La ruta tomada no fue correcta, tenemos que irnos para atrás
-        self.set_cell(col, row, 0) # borrar la celda, estaba mal)
+        self.set_cell(col, row, 0) # borrar la celda, estaba mal
         return False # Indicamos que hubo un error
         
     def check_safe(self, col, row, n):
@@ -106,6 +121,20 @@ class Sudoku():
         
         # No hay celdas vacías
         return (-1, -1)
+
+    def get_next_modifiable_cell(self, col, row):
+        """Regresa la posición de la siguiente celda modificable por el usuario a la derecha, o al principio de la siguiente
+        fila si se llegó al borde."""
+        # Número de 0 a self.size^2, representando cada celda
+        linear = row*self.size + col
+        while linear < (self.size**2):
+            (j, i) = (linear%self.size, linear//self.size)
+            if self.given[i][j] == 0:
+                return (j, i) # Celda vacía, retornar su columna y fila
+            linear += 1 # Siguiente celda
+        
+        # No hay celdas vacías
+        return (-1, -1)
     
     def get_subsquare_content(self, col, row):
         """Proporciona el contenido del cuadrado 3x3 en el que está la celda especificada."""
@@ -142,9 +171,12 @@ class Sudoku():
         Una tupla, con la longitud y altura."""
         return (self.size*4+1, self.size*2+1)
 
-    def render(self):
-        """Retorna un string con el tablero de sudoku."""
-        boxchars = SUDOKU_FONTS['basic']
+    def render(self, show_nums=True):
+        """Retorna un string con el tablero de sudoku.
+        
+        Argumentos:
+        show_nums: si mostrar los números de la cuadrícula o no. Default es sí."""
+        boxchars = SUDOKU_FONTS['double']
         numchars = CHAR_FONTS['alpha']
         # La lógica para renderizar esta cuadrícula inspirada en este repositorio: https://github.com/thisisparker/cursewords
 
@@ -179,8 +211,10 @@ class Sudoku():
                     row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][j%self.grade == 0]
                     row[0] += boxchars['hline'][0]*3
                 # La segunda fila tiene líneas verticales y espacios únicamente
-                n = self.content[i][j]
-                row[1] += boxchars['vline'][j % self.grade == 0] + f' {numchars[n] or " "} '
+                n = self.given[i][j]
+                # Mostrar el número en la celda, o nada si es 0
+                cell_content = f' {numchars[n] or " "} ' if show_nums else ' '*3
+                row[1] += boxchars['vline'][j % self.grade == 0] + cell_content
 
             # Añadir la última columna (la extra)
             row[0] += boxchars['urcorner'] if i == 0 else boxchars['vlline'][i%self.grade == 0]            

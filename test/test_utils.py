@@ -1,5 +1,5 @@
 import unittest
-from src.utils import pad
+from src.utils import pad, interpolate
 
 class TestPadding(unittest.TestCase):
 
@@ -30,6 +30,15 @@ class TestPadding(unittest.TestCase):
 
     def test_alignment_invalido(self):
         self.assertEqual(pad('TEST', 8, alignment='bogus'), pad('TEST', 8, alignment='center'))
+
+    def test_interpolate(self):
+        self.assertEqual(
+            interpolate(5, 0, 100, 0, 10), 50
+        )
+
+        self.assertEqual(
+            interpolate(25, 50, 100, 20, 40), 62.5
+        )
 
 
 if __name__ == '__main__':
