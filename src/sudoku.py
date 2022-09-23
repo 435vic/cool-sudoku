@@ -1,4 +1,5 @@
 from characters import SUDOKU_FONTS
+from random import shuffle
 
 class Sudoku():
     """Tablero de Sudoku."""
@@ -7,6 +8,34 @@ class Sudoku():
         self.grade = grade
         # Tamaño total del sudoku, en celdas.
         self.size = self.grade**2
+        # Contenido del sudoku, una matrix del tamaño self.size, con números del 0 al 9. 0 representa una celda vacía.
+        self.content = [[0 for _ in range(self.size)] for _ in range(self.size)]
+
+    def generate_sudoku(self):
+        """Genera un sudoku nuevo, y su solución."""
+        # Adaptado de https://www.geeksforgeeks.org/program-sudoku-generator/
+        # Intentaré sólo usar los pasos proporcionados, sin mirar al código para ver si lo puedo lograr solo.
+
+        # Following is the improved logic for the problem.
+        # 1. Fill all the diagonal 3x3 matrices.
+        # 2. Fill recursively rest of the non-diagonal matrices.
+        #    For every cell to be filled, we try all numbers until
+        #    we find a safe number to be placed.  
+        # 3. Once matrix is fully filled, remove K elements
+        #    randomly to complete game.
+
+        # Pseudoalgoritmo función recursiva
+        # for n in possibilities // números posibles, 1 al 9 normalmente
+        #     if is_safe:
+        #         safe_route = repeat_next_cell() // llamada a sí mismo
+        #         if safe_route return true // si la ruta es segura y no causa errores, podemos salir
+        #         if on_last_cell return true // si es la última celda y no hay errores ¡acabamos!
+        #     // llegamos a este punto si sucedió algun error
+        #     cell = 0 // borramos la celda, estábamos mal en algún otro lado
+        #     return false // la ruta no fue segura
+        
+
+
 
     def rendered_size(self):
         """Regresa el tamaño del tablero de Sudoku, en caracteres.
@@ -18,6 +47,8 @@ class Sudoku():
     def render(self):
         """Retorna un string con el tablero de sudoku."""
         boxchars = SUDOKU_FONTS['double']
+        # La lógica para renderizar esta cuadrícula inspirada en este repositorio: https://github.com/thisisparker/cursewords
+
         # El tablero está compuesto de líneas mayores y menores. Las mayores suceden cada 3 celdas
         # y en los bordes externos, y las menores en el resto de las líneas.
         grid = []
@@ -36,12 +67,10 @@ class Sudoku():
                             # Si estamos en la primera fila (borde superior), la columna es ┳, si no, ╋
                             row [0] += boxchars['hdline'][1] if i == 0 else boxchars['cross'][3]
                         # La fila de abajo está vacía por ahora
-                        row[1] += boxchars['vline'][1] + ' '*3 
                     ###### línea vertical menor ######
                     else: 
                         # Si estamos en la primera fila, la intersección es ┯, si no, ┿
                         row[0] += boxchars['hdline'][0] if i == 0 else boxchars['cross'][2]
-                        row[1] += boxchars['vline'][0] + ' '*3
 
                     row[0] += boxchars['hline'][1]*3
 
@@ -49,10 +78,10 @@ class Sudoku():
                 else:
                     # Si esta columna está en una línea vertical mayor, ┠ si es la primera o ╂ si no
                     row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][j%self.grade == 0]
-                    row[1] += boxchars['vline'][j % self.grade == 0]
                     row[0] += boxchars['hline'][0]*3
-                    row[1] += ' '*3
-            
+                # La segunda fila tiene líneas verticales y espacios únicamente
+                row[1] += boxchars['vline'][j % self.grade == 0] + f' {self.content[i][j] or " "} '
+
             # Añadir la última columna (la extra)
             row[0] += boxchars['urcorner'] if i == 0 else boxchars['vlline'][i%self.grade == 0]            
             row[1] += boxchars['vline'][1]
