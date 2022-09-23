@@ -52,3 +52,10 @@ SUDOKU_FONTS = {
         'cross': ['┼', '╫', '╪', '╬']
     }
 }
+
+# Caracteres del sudoku. Cuando hay más de nueve números se puede usar esta tabla para que el símbolo
+# siempre sea un sólo caracter.
+CHAR_FONTS = {
+    'numeric': ['1', '2','3','4','5','6','7','8'],
+    'hex': ['1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',]
+}
