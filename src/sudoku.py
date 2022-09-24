@@ -1,10 +1,11 @@
 from characters import SUDOKU_FONTS, CHAR_FONTS
 from random import shuffle, random
 from utils import interpolate
+from time import sleep
 
 class Sudoku():
     """Tablero de Sudoku."""
-    def __init__(self, grade=3, difficulty=0, callback=lambda a,b,c: ()):
+    def __init__(self, grade=3, difficulty=0):
         # 'nivel' del sudoku. Entre más alto, más grande y difícil el Sudoku.
         self.grade = grade
         # Tamaño total del sudoku, en celdas.
@@ -17,13 +18,21 @@ class Sudoku():
         self.correct = [[None for _ in range(self.size)] for _ in range(self.size)]
         # La dificultad del sudoku, valor de 0 a 1, representando el porcentaje de celdas que estarán vacías al empezar.
         self.difficulty = interpolate(difficulty, .6, .74)
-        # Función que se llama cada vez que se asigna una celda
-        self.callback = callback
 
-    def set_cell(self, col, row, n):
+    def set_cell(self, col, row, n, delay=0):
         """Le asigna el valor n a la celda especificada por su columna y fila."""
-        self.callback(col, row, n)
+        if delay:
+            sleep(delay)
         self.content[row][col] = n
+
+    def is_solved(self):
+        """Revisar si el sudoku está resuelto."""
+        solved = True
+        for row in range(self.size):
+            for col in range(self.size):
+                cell = self.content[row][col]
+                solved = solved and self.check_safe(col, row, cell) and cell != 0
+        return solved
 
     def generate_sudoku(self):
         """Genera un sudoku nuevo, y su solución."""
@@ -109,19 +118,16 @@ class Sudoku():
         out.extend(subsq)
         return out
 
-    def update_conflicts(self, col, row):
+    def update_conflicts(self, x, y):
         """Revisa el tablero en la posición (x, y) para determinar los números correctos e incorrectos.
         
         Regresa True si el número en (col, row) es incorrecto y se hicieron cambios, False en otro caso."""
         # Checar el número
-        curr_cel = self.content[row][col]
-        if curr_cel != 0 and self.given[row][col] == 0:
-            for cell_col, cell_row in self.get_neighbors(col, row) + [(col, row)]:
-                cell = self.content[cell_row][cell_col]
-                self.correct[cell_row][cell_col] = self.check_safe(cell_col, cell_row, cell)
+        for col, row in self.get_neighbors(x, y) + [(x, y)]:
+            cell = self.content[row][col]
+            self.correct[row][col] = self.check_safe(col, row, cell)
 
-            return True
-        return False
+        return True
 
     def get_next_empty_cell(self, col, row):
         """Regresa la posición de la siguiente celda vacía a la derecha, o al principio de la siguiente
@@ -154,26 +160,25 @@ class Sudoku():
         if direction % 2 == 0: # Arriba y abajo
             forward = 1 if direction == 2 else -1
             if not lazy: row = (row + forward) % self.size
+            i = 0
             while self.given[row][col] != 0:
                 row = (row + forward) % self.size # Hacia arriba o abajo, dependiendo de la dirección
+                if i > len(self.given): # Dimos una vuelta completa, no hay espacios disponibles en esta columna
+                    col = (col + 1) % self.size
+                    i = 0 # reseteamos el contador
+                i += 1
             return col, row
         else: # Izquierda y derecha
             forward = 1 if direction == 1 else -1
             if not lazy: col = (col + forward) % self.size
+            i = 0
             while self.given[row][col] != 0:
                 col = (col + forward) % self.size
+                if i > len(self.given): # Dimos una vuelta completa, no hay espacios disponibles en esta fila
+                    row = (row + 1) % self.size
+                    i = 0 # reseteamos el contador
+                i += 1
             return col, row
-    
-    def get_subsquare_content(self, col, row):
-        """Proporciona el contenido del cuadrado 3x3 en el que está la celda especificada."""
-        out = []
-        # Cambia las coordenadas a la esquina superior izquierda del subcuadrado donde está
-        (sq_col, sq_row) = (col//self.grade*self.grade, row//self.grade*self.grade)
-        for i in range(sq_row, sq_row+self.grade):
-            for j in range(sq_col, sq_col+self.grade):
-                out.append(self.content[i][j])
-
-        return out
 
     def get_subsquare_cells(self, col, row):
         """Proporciona las coordenadas de las celdas del cuadrado 3x3 en el que está la celda especificada."""

@@ -14,6 +14,8 @@ class SudokuScreen():
         self.difficulty = difficulty
         self.cursor_pos = [0, 0]
         self.sud = Sudoku(grade, difficulty)
+        self.edited_cell = False # Bandera que indica si se editó una celda
+
 
     def render(self):
         with term.fullscreen(), term.cbreak():
@@ -39,34 +41,41 @@ class SudokuScreen():
                 key = term.inkey()
                 # Si la tecla presionada es un número, sea del teclado principal o el keypad
                 if (n := key).isnumeric() or (n := key).replace('KEY_KP_', '').isnumeric():
-                    x, y = self.cursor_pos
+                    num = int(n)
+                    if num > self.sud.size:
+                        continue # El número está fuera de rango
+                    col, row = self.cursor_pos
                     # Cambiar el número en el tablero si es modificable
-                    if self.sud.given[y][x] == 0:
-                        self.sud.content[y][x] = int(n)
-                        self.sud.correct[y][x] = None
+                    if self.sud.given[row][col   ] == 0:
+                        self.sud.content[row][col] = num
+                        self.sud.correct[row][col] = None
+                        self.edited_cell = True
                     else:
                         continue
                 elif is_key_directional(key):
-                    x, y = self.handle_move(key)
+                    self.update_numbers(col, row)
+                    col, row = self.handle_move(key)
                     # Hacemos flush para que el cursor se mueva immediatamente, y no tengamos que renderizar todo
                     # el tablero cada vez que cambiemos celda
-                    self.move_cursor_to(x, y, flush=True)
+                    self.move_cursor_to(col, row, flush=True)
                     continue # esto se salta self.draw_sudoku()
                 elif key.code == term.KEY_BACKSPACE or key.code == term.KEY_DELETE:
-                    x, y = self.cursor_pos
+                    col, row = self.cursor_pos
                     # Cambiar el número en el tablero si es modificable
-                    if self.sud.given[y][x] == 0:
-                        self.sud.content[y][x] = 0
+                    if self.sud.given[row][col] == 0:
+                        self.sud.content[row][col] = 0
+                    self.update_numbers(col, row)
                 elif key.code == term.KEY_SDC:
                     # Borrar todo el tablero
                     for i in range(self.sud.size):
                         for j in range(self.sud.size):
                             self.sud.content[i][j] = self.sud.given[i][j]
-                    self.draw_sudoku()
+                            self.sud.correct[i][j] = None
                 elif key.code == term.KEY_ENTER:
-                    x, y = self.cursor_pos
-                    x, y = self.sud.get_next_modifiable_cell(x, y, 1)
-                    self.move_cursor_to(x, y, flush=True)
+                    self.update_numbers(col, row)
+                    col, row = self.cursor_pos
+                    col, row = self.sud.get_next_modifiable_cell(col, row, 1)
+                    self.move_cursor_to(col, row, flush=True)
                     continue # esto se salta self.draw_sudoku()
                 elif key == 'q' or key.code == term.KEY_ESCAPE:
                     break
@@ -81,11 +90,18 @@ class SudokuScreen():
 
         self.stop()
 
+    def update_numbers(self, col, row):
+        """Actualizar los números y si están correctos o no."""
+        # Revisar números, colorear números correctos/incorrectos si es necesario
+        # Sólo sucede si se editó un número
+        if self.edited_cell:
+            self.sud.update_conflicts(col, row)
+            self.draw_sudoku(grid=False)
+            self.edited_cell = False # Resetear bandera
+
     def handle_move(self, key):
         (x, y) = self.cursor_pos
-        # Revisar números, colorear números correctos/incorrectos si es necesario
-        if self.sud.update_conflicts(x, y):
-            self.draw_sudoku(grid=False)
+        
         # flecha: mover celda
         if key.code == term.KEY_UP or key == 'w':
             y = (y - 1) % self.sud.size
@@ -141,24 +157,32 @@ class SudokuScreen():
             if numbers:
                 # Mover el cursor a la primera celda
                 sys.stdout.write(term.home)
+                # Esta variable guardará si todos los números son correctos
+                correct = True
                 for i in range(self.sud.size):
                     for j in range(self.sud.size):
                         (cell_x, cell_y) = self.calc_cursor_pos(j, i)
                         sys.stdout.write(term.move_xy(cell_x, cell_y))
+                        cell_correct = self.sud.correct[i][j]
+                        correct = correct and cell_correct
                         # Es el número en esta celda uno predeterminado o escrito por el usuario?
                         if (n := self.sud.given[i][j]) == 0:
                             n = self.sud.content[i][j]
                             color = term.normal
-                            if self.sud.correct[i][j] == True:
+                            if cell_correct == True:
                                 color = term.palegreen
-                            elif self.sud.correct[i][j] == False:
+                            elif cell_correct == False:
                                 color = term.lightcoral
                             sys.stdout.write(color + CHAR_FONTS['alpha'][n] + term.normal)
                         else:
                             color = term.slategray4
-                            if self.sud.correct[i][j] == False:
+                            if cell_correct == False:
                                 color = term.firebrick4
                             sys.stdout.write(color + CHAR_FONTS['alpha'][n] + term.normal)
+
+                if correct:
+                    if self.sud.is_solved():
+                        self.draw_subtitle('LO LOGRASTEEE')
 
             sys.stdout.flush()
     
