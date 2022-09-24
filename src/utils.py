@@ -1,3 +1,5 @@
+from blessed import Terminal
+
 def pad(text: str, length: int, alignment='center', pad_char=' '):
     """Le pone padding a un texto. Toma como argumentos el texto, la longitud deseada y la alineación,
        La cual puede ser `left`, `right` o `center`. Regresa el texto, con padding de `center` si el valor
@@ -25,3 +27,10 @@ def interpolate(n, out_start, out_end, in_start=0, in_end=1):
     in_span = in_end-in_start
     out_span = out_end-out_start
     return ((((n-in_start) / in_span)) * out_span) + out_start
+
+def is_key_directional(key):
+    """Si una tecla proporcionada es direccional. Incluye las flechas y WASD."""
+    term = Terminal()
+    if key.is_sequence:
+        return key.code in [term.KEY_UP, term.KEY_DOWN, term.KEY_LEFT, term.KEY_RIGHT]
+    return key.lower() in ['w', 'a', 's', 'd']

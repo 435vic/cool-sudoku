@@ -31,8 +31,8 @@ class Select:
 
     def render_help_message(self):
         """Imprime un mensaje de guía con los controles para el menú."""
-        msg = "[⬆⬇ para seleccionar | esc para cancelar | enter para confirmar]"
-        print('\n' + term.gray + msg + term.normal)
+        msg = "[↑↓ para seleccionar | esc para cancelar | enter para confirmar]"
+        print('\n' + term.dimgray(msg))
 
     def set_prompt(self, text):
         self._text = text
@@ -74,7 +74,7 @@ class Select:
                     if not erase_after_use:
                         print(term.move_up() + term.move_right(len(text)) + term.aqua + list(self.options.values())[index] + term.normal)
                     return list(self.options.keys())[index]
-                elif key.name == 'KEY_ESCAPE':
+                elif key.name == 'KEY_ESCAPE' or key == 'q':
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
                     print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
                     if not erase_after_use:
