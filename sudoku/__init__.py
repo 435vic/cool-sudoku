@@ -1,15 +1,18 @@
+"""Módulo principal del programa. Se encarga de la configuración y rutinas de alto nivel."""
+
 ############################################
 #                  Sudoku                  #
 #           por Victor Quintana            #
 #             a10643020@tec.mx             #
 ############################################
 
-from utils import pad, pause
-from terminal import Select, get_terminal
-from screen import SudokuScreen
-from characters import get_title
+from .utils import pad, pause
+from .terminal import Select, get_terminal
+from .screen import SudokuScreen
+from .characters import get_title
 
 def main():
+    """Función principal del programa."""
     term = get_terminal()
     main_menu = Select({
         'sudoku': 'Jugar Sudoku',
