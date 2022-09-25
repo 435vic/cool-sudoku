@@ -4,12 +4,12 @@
 #             a10643020@tec.mx             #
 ############################################
 
-def main():
-    from utils import pad
-    from terminal import Select, get_terminal
-    from screen import SudokuScreen
-    from characters import get_title
+from utils import pad, pause
+from terminal import Select, get_terminal
+from screen import SudokuScreen
+from characters import get_title
 
+def main():
     term = get_terminal()
     main_menu = Select({
         'sudoku': 'Jugar Sudoku',
@@ -31,32 +31,25 @@ def main():
                 2: '2 x 2 (Mini)',
                 4: '4 x 4 (Loco)'
             }).prompt('Selecciona un tamaño: ')
-
+            # Si la elección es cancelada regresar al principio
+            if grade == None:
+                pause('Presiona enter para continuar...')
+                # Borra la línea que acabamos de imprimir y el prompt anterior
+                print(term.move_up(2) + term.clear_eos, end='')
+                continue
             diff = Select({
                 0: 'Fácil',
                 .5: 'Intermedio',
                 1: 'Difícil'
             }).prompt('Selecciona la dificultad: ', default=1)
-
+            # Si la elección es cancelada regresar al principio
+            if diff == None:
+                pause('Presiona enter para continuar...')
+                # Borra la línea de pause y los dos prompts anteriores
+                print(term.move_up(3) + term.clear_eos, end='')
+                continue
             SudokuScreen(grade, diff).render()
             print(term.move_up(2) + term.clear_eos)
-        elif option == 'creds':
-            print(f"{term.home}{term.black_on_skyblue}{term.clear}")
-            print("press 'q' to quit.")
-            with term.cbreak():
-                val = ''
-                while val.lower() != 'q':
-                    val = term.inkey(timeout=3)
-                    if not val:
-                        print("It sure is quiet in here ...")
-                    elif val.is_sequence:
-                        print("got sequence: {0}.".format((str(val), val.name, val.code)))
-                    elif val:
-                        print("got {0}.".format(val))
-                print(f'bye!{term.normal}')
-    
-    
-
 
 if __name__ == '__main__':
     main()

@@ -1,29 +1,27 @@
-from time import sleep
-from blessed import Terminal
-import sys
+"""Clases de utilidad para la manipulación de la consola."""
 
 from blessed import Terminal
-import sys
-
 term = Terminal()
 
+# pylint: disable=missing-function-docstring
 def get_terminal():
     return term
 
 class Select:
     """Menú de selección.
-    
+
     Argumentos:
     options (dict(str, str)): Diccionario de opciones. La llave representa una identificación, y el valor lo que se
     mostrará en esa opción.
     """
 
-    def __init__(self, options: dict):
+    def __init__(self, options):
         self.options = options
         self.index = 0
         self._text = None
 
     def render(self, selection=0):
+        """Renderiza el menú de selección a la consola."""
         # Imprimir las opciones, añadiendo el cursor (>) en caso de que sea la seleccionada.
         for (idx, option) in enumerate(self.options.values()):
             cursor = '   ' if not idx == selection else term.aqua + ' > '
@@ -35,17 +33,18 @@ class Select:
         print('\n' + term.dimgray(msg))
 
     def set_prompt(self, text):
+        """Configura el prompt del menú de selección, sin imprimirlo a la pantalla."""
         self._text = text
         return self
 
     def prompt(self, text='', default=0, erase_after_use=False):
         """Renderiza la lista de opciones con un prompt especificado.
-        
+
         Argumentos:
         text (str): El prompt.
         default (int): El item que estará seleccionado al inicio (default: 0)
         erase_after_use (boolean): Si después de elegir la opción, dejar la línea con la selección (False) o eliminarla (True)
-        
+
         Retorna: La opción seleccionada."""
         # Preparar la consola para recibir teclas individuales, y esconder el cursor
         with term.cbreak(), term.hidden_cursor():

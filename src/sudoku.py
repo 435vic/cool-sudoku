@@ -1,7 +1,10 @@
-from characters import SUDOKU_FONTS, CHAR_FONTS
-from random import shuffle, random
-from utils import interpolate
+"""Este módulo contiene la clase Sudoku, para configurar e interactuar con un tablero Sudoku."""
+
+from random import normalvariate, shuffle
 from time import sleep
+
+from .characters import CHAR_FONTS, SUDOKU_FONTS
+from .utils import interpolate
 
 class Sudoku():
     """Tablero de Sudoku."""
@@ -16,11 +19,18 @@ class Sudoku():
         self.given = [[0 for _ in range(self.size)] for _ in range(self.size)]
         # Una matriz expresando si el número en dicha posición es correcto
         self.correct = [[None for _ in range(self.size)] for _ in range(self.size)]
-        # La dificultad del sudoku, valor de 0 a 1, representando el porcentaje de celdas que estarán vacías al empezar.
-        self.difficulty = interpolate(difficulty, .6, .74)
+        # Calcular dificultad.
+        # Quitar entre el 45% de celdas al 78%, dependiendo de la dificultad.
+        p = interpolate(difficulty, .45, .78)
+        # Calculamos la cantidad de celdas a quitar. Basada en una distribución normal, centrada en p (el porcentaje calculado).
+        # Esto está hecho para que no siempre se quiten la misma cantidad de celdas, pero que no varíe demasiado.
+        # La desviación estándar sera de 4 celdas. El 65% de las veces se quitarán 4 celdas más o menos que el porcentaje calculado,
+        # y se quitarán 8 dentro del 95%, esto en caso de una celda 9x9.
+        self.difficulty = normalvariate(p, 0.025)
 
     def set_cell(self, col, row, n, delay=0):
         """Le asigna el valor n a la celda especificada por su columna y fila."""
+        # Solo por razones cosméticas, si se quiere demostrar
         if delay:
             sleep(delay)
         self.content[row][col] = n
@@ -43,7 +53,7 @@ class Sudoku():
         # 1. Fill all the diagonal 3x3 matrices.
         # 2. Fill recursively rest of the non-diagonal matrices.
         #    For every cell to be filled, we try all numbers until
-        #    we find a safe number to be placed.  
+        #    we find a safe number to be placed.
         # 3. Once matrix is fully filled, remove K elements
         #    randomly to complete game.
 
@@ -65,13 +75,10 @@ class Sudoku():
         self.recursive_solve(self.grade, 0)
 
         # Paso 3: Ahora que tenemos un tablero válido, podemos quitar números.
-        for i in range(self.size):
-            for j in range(self.size):
-                if random() < self.difficulty:
-                    self.content[i][j] = 0
-                
-                # Configuramos los números iniciales
-                self.given[i][j] = self.content[i][j]
+        # Quitamos las celdas según la dificultad calculada en __init__
+        # Calcular cuántas celdas tenemos que quitar, ya que el valor de dificultad es un porcentaje.
+        squares = int(self.difficulty * self.size**2)
+        self.remove_random_squares(squares)
 
     def recursive_solve(self, col, row):
         """Resuelve el tablero de sudoku recursivamente, retornando verdadero al terminar."""
@@ -111,23 +118,23 @@ class Sudoku():
         """Retorna todas las celdas que interactúan con la celda (col, row), es decir,
         todas las celdas en la misma fila, columna y subcuadrado."""
         out = []
+        # Las coordenadas de las celdas de la misma fila, excepto la celda que checamos
         out.extend([(i, row) for i in range(self.size) if (i, row) != (col, row)])
+        # Las coordenadas de las celdas de la misma columna, excepto la celda proporcionada
         out.extend([(col, i) for i in range(self.size) if (col, i) != (col, row)])
+        # Conseguir las celdas en el mismo cuadrado
         subsq = self.get_subsquare_cells(col, row)
+        # Quitar la celda proporcionada
         subsq.remove((col, row))
         out.extend(subsq)
         return out
 
     def update_conflicts(self, x, y):
-        """Revisa el tablero en la posición (x, y) para determinar los números correctos e incorrectos.
-        
-        Regresa True si el número en (col, row) es incorrecto y se hicieron cambios, False en otro caso."""
-        # Checar el número
+        """Revisa el tablero en la posición (x, y) para determinar los números correctos e incorrectos."""
+        # Checar cada 'vecino' (celdas en la misma columna, fila y cuadrado) es correcto
         for col, row in self.get_neighbors(x, y) + [(x, y)]:
             cell = self.content[row][col]
             self.correct[row][col] = self.check_safe(col, row, cell)
-
-        return True
 
     def get_next_empty_cell(self, col, row):
         """Regresa la posición de la siguiente celda vacía a la derecha, o al principio de la siguiente
@@ -139,14 +146,14 @@ class Sudoku():
             (j, i) = (linear%self.size, linear//self.size)
             if self.content[i][j] == 0:
                 return (j, i) # Celda vacía, retornar su columna y fila
-        
+
         # No hay celdas vacías
         return (-1, -1)
 
     def get_next_modifiable_cell(self, col, row, direction, lazy=False):
         """Regresa la posición de la siguiente celda modificable por el usuario a la derecha, o al principio de la siguiente
         fila si se llegó al borde.
-        
+
         Argumentos:
         col: columna.
         row: fila.
@@ -156,7 +163,7 @@ class Sudoku():
             - 2: abajo
             - 3: izquierda
         lazy: si es verdadero, permanecer en la celda proporcionada si ésta es válida. Falso por default."""
-        
+
         if direction % 2 == 0: # Arriba y abajo
             forward = 1 if direction == 2 else -1
             if not lazy: row = (row + forward) % self.size
@@ -168,17 +175,17 @@ class Sudoku():
                     i = 0 # reseteamos el contador
                 i += 1
             return col, row
-        else: # Izquierda y derecha
-            forward = 1 if direction == 1 else -1
-            if not lazy: col = (col + forward) % self.size
-            i = 0
-            while self.given[row][col] != 0:
-                col = (col + forward) % self.size
-                if i > len(self.given): # Dimos una vuelta completa, no hay espacios disponibles en esta fila
-                    row = (row + 1) % self.size
-                    i = 0 # reseteamos el contador
-                i += 1
-            return col, row
+    # Izquierda y derecha
+        forward = 1 if direction == 1 else -1
+        if not lazy: col = (col + forward) % self.size
+        i = 0
+        while self.given[row][col] != 0:
+            col = (col + forward) % self.size
+            if i > len(self.given): # Dimos una vuelta completa, no hay espacios disponibles en esta fila
+                row = (row + 1) % self.size
+                i = 0 # reseteamos el contador
+            i += 1
+        return col, row
 
     def get_subsquare_cells(self, col, row):
         """Proporciona las coordenadas de las celdas del cuadrado 3x3 en el que está la celda especificada."""
@@ -191,13 +198,31 @@ class Sudoku():
 
         return out
 
-    def fill_subsquare(self, id):
+    def remove_random_squares(self, n):
+        """Borra la cantidad proporcionada de celdas en el tablero, de manera aleatoria,
+        y marca el resto como celdas default, previniendo su edición por el usuario."""
+        # Una lista con todas las celdas. Se puede calcular su coordenada mediante modulo y división rondeada.
+        cells = list(range(self.size**2))
+        # Cambiamos el orden. Esto se hace de esta manera en lugar de generar coordenadas aleatorias para garantizar
+        # la cantidad de celdas que se quitarán siempre va a ser lo especificado.
+        shuffle(cells)
+        for (i, cell) in enumerate(cells):
+            x, y = cell % self.size, cell // self.size
+            if i < n: # Celda a quitar
+                # Resetear celda
+                self.content[y][x] = 0
+                self.correct[y][x] = None
+            else: # Celda predeterminada
+                self.given[y][x] = self.content[y][x]
+
+
+    def fill_subsquare(self, n):
         """Llena un cuadrado 3x3 con números aleatorios.
-        
+
         Argumentos:
         id (int): El número de cuadro. Se cuenta de izquierda a derecha y luego de arriba a abajo. Empieza en cero."""
         # Calcular las coordenadas del cuadrado.
-        (sq_col, sq_row) = ((id % self.grade)*self.grade, (id // self.grade) * self.grade)
+        (sq_col, sq_row) = ((n % self.grade)*self.grade, (n // self.grade) * self.grade)
         nums = list(range(1,self.size+1))
         shuffle(nums)
         for i in range(sq_row, sq_row+self.grade):
@@ -207,20 +232,19 @@ class Sudoku():
 
     def rendered_size(self):
         """Regresa el tamaño del tablero de Sudoku, en caracteres.
-        
+
         Retorna:
         Una tupla, con la longitud y altura."""
         return (self.size*4+1, self.size*2+1)
 
     def render(self, show_nums=True):
         """Retorna un string con el tablero de sudoku.
-        
+
         Argumentos:
         show_nums: si mostrar los números de la cuadrícula o no. Default es sí."""
         boxchars = SUDOKU_FONTS['double']
         numchars = CHAR_FONTS['alpha']
         # La lógica para renderizar esta cuadrícula inspirada en este repositorio: https://github.com/thisisparker/cursewords
-
         # El tablero está compuesto de líneas mayores y menores. Las mayores suceden cada 3 celdas
         # y en los bordes externos, y las menores en el resto de las líneas.
         grid = []
@@ -240,7 +264,7 @@ class Sudoku():
                             row [0] += boxchars['hdline'][1] if i == 0 else boxchars['cross'][3]
                         # La fila de abajo está vacía por ahora
                     ###### línea vertical menor ######
-                    else: 
+                    else:
                         # Si estamos en la primera fila, la intersección es ┯, si no, ┿
                         row[0] += boxchars['hdline'][0] if i == 0 else boxchars['cross'][2]
 
@@ -258,10 +282,10 @@ class Sudoku():
                 row[1] += boxchars['vline'][j % self.grade == 0] + cell_content
 
             # Añadir la última columna (la extra)
-            row[0] += boxchars['urcorner'] if i == 0 else boxchars['vlline'][i%self.grade == 0]            
+            row[0] += boxchars['urcorner'] if i == 0 else boxchars['vlline'][i%self.grade == 0]
             row[1] += boxchars['vline'][1]
             # Añadir las dos filas completadas a la cuadrícula
-            grid.extend(row) 
+            grid.extend(row)
 
         # Añadir la fila extra
         final_row = boxchars['llcorner']+boxchars['hline'][1]*3 \
@@ -271,8 +295,8 @@ class Sudoku():
         grid.append(final_row)
         return grid
 
-
 def main():
+    """Función de prueba"""
     sud = Sudoku()
     print('\n'.join(sud.render()))
 
