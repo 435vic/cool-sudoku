@@ -21,13 +21,13 @@ def main():
         'creds': 'Créditos',
         'quit': 'Salir'
     }).set_prompt('Elige una opción: ')
-    print(get_title(term.width))
+    title = get_title(term.width)
+    print(title)
 
     while True:
         option = main_menu.prompt(erase_after_use=True)
         if option in ['quit', None]:
-            print("Gracias por jugar!")
-            return
+            break
         elif option == 'sudoku':
             grade = Select({
                 3: '3 x 3 (Estándar)',
@@ -35,7 +35,7 @@ def main():
                 4: '4 x 4 (Loco)'
             }).prompt('Selecciona un tamaño: ')
             # Si la elección es cancelada regresar al principio
-            if grade == None:
+            if grade is None:
                 pause('Presiona enter para continuar...')
                 # Borra la línea que acabamos de imprimir y el prompt anterior
                 print(term.move_up(2) + term.clear_eos, end='')
@@ -46,13 +46,18 @@ def main():
                 1: 'Difícil'
             }).prompt('Selecciona la dificultad: ', default=1)
             # Si la elección es cancelada regresar al principio
-            if diff == None:
+            if diff is None:
                 pause('Presiona enter para continuar...')
                 # Borra la línea de pause y los dos prompts anteriores
                 print(term.move_up(3) + term.clear_eos, end='')
                 continue
             SudokuScreen(grade, diff).render()
-            print(term.move_up(2) + term.clear_eos)
+            print(term.move_up(3) + term.clear_eos)
+
+    # Borrar el título
+    print(term.move_up(len(title.splitlines())+1) + term.clear_eos, end='', flush=True)
+    print("Gracias por jugar Sudoku!")
+
 
 if __name__ == '__main__':
     main()

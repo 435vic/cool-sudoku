@@ -75,7 +75,7 @@ class Select:
                     return list(self.options.keys())[index]
                 elif key.name == 'KEY_ESCAPE' or key == 'q':
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
-                    print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
+                    print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='', flush=True)
                     if not erase_after_use:
                         print(term.move_up() + term.move_right(len(text)) + term.red + 'Cancelado' + term.normal)
                     return None

@@ -255,9 +255,9 @@ class SudokuScreen():
         title_height = len(SUDOKU_TITLE_INGAME.splitlines())
         (_, sudoku_height) = self.sud.rendered_size()
         with term.location(), term.hidden_cursor():
-            if title_height >= (term.height - sudoku_height - title_height)//2:
+            if title_height <= ((term.height - sudoku_height)//2) - 1:
                 sys.stdout.write(term.home)
-                sys.stdout.write(term.move_down((term.height - sudoku_height)//4 - title_height//2))
+                sys.stdout.write(term.move_down(((term.height - sudoku_height)//4 - title_height//2) - 1))
                 for line in SUDOKU_TITLE_INGAME.splitlines():
                     sys.stdout.write(term.center(line))
                 sys.stdout.flush()
