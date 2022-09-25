@@ -37,7 +37,24 @@ def is_key_directional(key):
         return key.code in [term.KEY_UP, term.KEY_DOWN, term.KEY_LEFT, term.KEY_RIGHT]
     return key.lower() in ['w', 'a', 's', 'd']
 
-def pause(prompt, timeout=None):
+def format_time(t):
+    """Formatea los segundos proporcionados en el formato hh:mm:ss, con las siguientes características:
+
+    - Si la hora es 0, esconder
+    - Si los minutos son menores a 10, se imprime sin el cero antes
+    - Los segundos siempre son dos caracteres
+
+    Ejemplo:
+    format_time(100) -> 1:40
+    format_time(61) -> 1:01
+    format_time(600) -> 10:00
+    format_time(3700) -> 1:01:40"""
+    secs = t % 60
+    mins = (t // 60) % 60
+    hrs = t // 60 // 60
+    return f"{f'{hrs}:' if hrs > 0 else ''}{'0' if mins < 10 and hrs > 0 else ''}{mins}:{'0' if secs < 10 else ''}{secs}"
+
+def pause(prompt=None, timeout=None):
     """Pausa el programa hasta que una tecla es presionada. Equivalente al comando `pause` en Windows.
 
     Recibe un argumento `prompt` que es el texto que se imprimirá antes de esperar a una tecla.
@@ -46,7 +63,7 @@ def pause(prompt, timeout=None):
     en caso de que no se reciban teclas."""
     term = Terminal()
     with term.cbreak(), term.hidden_cursor():
-        print(prompt, end='', flush=True)
+        if prompt is not None:
+            print(prompt, end='', flush=True)
         term.inkey(timeout)
         print('') # Imprime un newline
- 

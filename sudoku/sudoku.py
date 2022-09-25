@@ -18,7 +18,7 @@ class Sudoku():
         # Los números predeterminados del sudoku, no se pueden cambiar
         self.given = [[0 for _ in range(self.size)] for _ in range(self.size)]
         # Una matriz expresando si el número en dicha posición es correcto
-        self.correct = [[None for _ in range(self.size)] for _ in range(self.size)]
+        self.correct = [[True for _ in range(self.size)] for _ in range(self.size)]
         # Calcular dificultad.
         # Quitar entre el 45% de celdas al 78%, dependiendo de la dificultad.
         p = interpolate(difficulty, .45, .78)
@@ -276,7 +276,7 @@ class Sudoku():
                     row[0] += boxchars['vrline'][0] if j == 0 else boxchars['cross'][j%self.grade == 0]
                     row[0] += boxchars['hline'][0]*3
                 # La segunda fila tiene líneas verticales y espacios únicamente
-                n = self.given[i][j]
+                n = self.content[i][j]
                 # Mostrar el número en la celda, o nada si es 0
                 cell_content = f' {numchars[n] or " "} ' if show_nums else ' '*3
                 row[1] += boxchars['vline'][j % self.grade == 0] + cell_content
