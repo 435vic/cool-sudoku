@@ -6,7 +6,7 @@ import time
 from .terminal import get_terminal
 from .sudoku import Sudoku
 from .utils import is_key_directional, format_time, pause
-from .characters import CHAR_FONTS, SUDOKU_TITLE_INGAME
+from .characters import CHAR_FONTS, SUDOKU_TITLE_INGAME, SUDOKU_TITLE_SMALL
 
 term = get_terminal()
 
@@ -297,3 +297,23 @@ class SudokuScreen():
     def stop(self):
         pass
         # print("done!")
+
+credit_text = f"""
+por Victor Quintana - A10643020@tec.mx
+
+Este programa fue creado por Victor Quintana para la clase de Pensamiento Computacional para Ingeniería.
+
+Se usó la librería blessings para la manipulación de la consola:
+{term.link('https://github.com/jquast/blessed', 'Blessed en GitHub')}
+"""
+
+class CreditsScreen:
+    """Créditos del programa."""
+    def render(self):
+        with term.location(), term.hidden_cursor(), term.cbreak(), term.fullscreen():
+            print(term.home + term.clear)
+            for line in SUDOKU_TITLE_SMALL.splitlines():
+                print(term.center(line))
+            for line in credit_text.splitlines():
+                print(term.center(line))
+            term.inkey()

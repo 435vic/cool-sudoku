@@ -8,7 +8,7 @@
 
 from .utils import pad, pause
 from .terminal import Select, get_terminal
-from .screen import SudokuScreen
+from .screen import SudokuScreen, CreditsScreen
 from .characters import get_title
 
 def main():
@@ -17,7 +17,6 @@ def main():
     main_menu = Select({
         'sudoku': 'Jugar Sudoku',
         'reglas': 'Reglas',
-        'opts': 'Opciones',
         'creds': 'Créditos',
         'quit': 'Salir'
     }).set_prompt('Elige una opción: ')
@@ -53,11 +52,12 @@ def main():
                 continue
             SudokuScreen(grade, diff).render()
             print(term.move_up(3) + term.clear_eos)
+        elif option == 'creds':
+            CreditsScreen().render()
 
     # Borrar el título
     print(term.move_up(len(title.splitlines())+1) + term.clear_eos, end='', flush=True)
     print("Gracias por jugar Sudoku!")
-
 
 if __name__ == '__main__':
     main()
