@@ -8,7 +8,7 @@ from .utils import interpolate
 
 class Sudoku():
     """Tablero de Sudoku."""
-    def __init__(self, grade=3, difficulty=0):
+    def __init__(self, grade=3, difficulty=0, callback=None):
         # 'nivel' del sudoku. Entre más alto, más grande y difícil el Sudoku.
         self.grade = grade
         # Tamaño total del sudoku, en celdas.
@@ -27,22 +27,27 @@ class Sudoku():
         # La desviación estándar sera de 4 celdas. El 65% de las veces se quitarán 4 celdas más o menos que el porcentaje calculado,
         # y se quitarán 8 dentro del 95%, esto en caso de una celda 9x9.
         self.difficulty = normalvariate(p, 0.025)
+        self.callback = callback
 
     def set_cell(self, col, row, n, delay=0):
         """Le asigna el valor n a la celda especificada por su columna y fila."""
         # Solo por razones cosméticas, si se quiere demostrar
         if delay:
             sleep(delay)
+        if self.callback is not None:
+            self.callback()
         self.content[row][col] = n
 
     def is_solved(self):
         """Revisar si el sudoku está resuelto."""
-        solved = True
         for row in range(self.size):
             for col in range(self.size):
                 cell = self.content[row][col]
-                solved = solved and self.check_safe(col, row, cell) and cell != 0
-        return solved
+                self.correct[row][col] = self.check_safe(col, row, cell)
+                correct = (self.correct[row][col]) and cell != 0
+                if not correct:
+                    return False
+        return True
 
     def generate_sudoku(self):
         """Genera un sudoku nuevo, y su solución."""
@@ -103,14 +108,23 @@ class Sudoku():
     def check_safe(self, col, row, n):
         """Verifica si un número n cumple con las reglas del Sudoku al ser colocado en la celda (col, row).
         Esta función asume que el tablero está en un estado válido."""
-        if col >= self.size or row >= self.size:
-            raise Exception('Fuera de rango')
-        # Revisar filas, columnas y cuadrados
-        for cell_col, cell_row in self.get_neighbors(col, row):
-            cell = self.content[cell_row][cell_col]
-            # Verificar que la celda tiene un número, y si se repite
-            if cell != 0 and cell == n:
+        # No usamos la función get_neighbors ya que es muy lenta para la recursión que hacemos al generar el sudoku
+        # Revisar fila
+        for (idx, cell) in enumerate(self.content[row]):
+            # El número ya existe en la fila, salir
+            if cell != 0 and cell == n and (idx, row) != (col, row):
                 return False
+        # Revisar columna
+        for (idx, cell) in enumerate([self.content[i][col] for i in range(self.size)]):
+            if cell != 0 and cell == n and (col, idx) != (col, row):
+                return False
+        # Revisar cuadrado
+        (sq_col, sq_row) = (col//self.grade*self.grade, row//self.grade*self.grade)
+        for i in range(sq_row, sq_row+self.grade):
+            for j in range(sq_col, sq_col+self.grade):
+                cell = self.content[i][j]
+                if cell != 0 and cell == n and (j, i) != (col, row):
+                    return False
         # Todas las pruebas se cumplieron, el número es seguro
         return True
 

@@ -6,7 +6,7 @@
 #             a10643020@tec.mx             #
 ############################################
 
-from .utils import pad, pause
+from .utils import pause
 from .terminal import Select, get_terminal
 from .screen import SudokuScreen, CreditsScreen
 from .characters import get_title
@@ -46,7 +46,7 @@ def main():
             }).prompt('Selecciona la dificultad: ', default=1)
             # Si la elección es cancelada regresar al principio
             if diff is None:
-                pause('Presiona enter para continuar...')
+                pause('Presiona cualquier tecla para continuar...')
                 # Borra la línea de pause y los dos prompts anteriores
                 print(term.move_up(3) + term.clear_eos, end='')
                 continue
@@ -57,7 +57,7 @@ def main():
 
     # Borrar el título
     print(term.move_up(len(title.splitlines())+1) + term.clear_eos, end='', flush=True)
-    print("Gracias por jugar Sudoku!")
+    print("¡Gracias por jugar Sudoku! Tu cerebro te lo agradecerá :)")
 
 if __name__ == '__main__':
     main()
