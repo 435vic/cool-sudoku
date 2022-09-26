@@ -8,7 +8,7 @@
 
 from .utils import pause
 from .terminal import Select, get_terminal
-from .screen import SudokuScreen, CreditsScreen
+from .screen import SudokuScreen, CreditsScreen, RulesScreen
 from .characters import get_title
 
 def main():
@@ -54,6 +54,8 @@ def main():
             print(term.move_up(3) + term.clear_eos)
         elif option == 'creds':
             CreditsScreen().render()
+        elif option == 'reglas':
+            RulesScreen().render()
 
     # Borrar el título
     print(term.move_up(len(title.splitlines())+1) + term.clear_eos, end='', flush=True)

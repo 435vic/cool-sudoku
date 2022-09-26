@@ -335,12 +335,26 @@ class SudokuScreen():
         pass
         # print("done!")
 
+controls_text = f"""
+┏━━━━━━━━━━━━━━━━━┓
+┃    Controles    ┃
+┗━━━━━━━━━━━━━━━━━┛
+{term.dimgray}
+←↑↓→ | wasd      cambiar celda
+del | backspace  borrar celda
+Shift + wasd     siguiente celda
+Shift + del      borrar
+q                salir
+"""[1:]
+
 credit_text = f"""
 por Victor Quintana - A10643020@tec.mx
 
 Este programa fue creado por Victor Quintana para la clase de Pensamiento Computacional para Ingeniería.
+Todos los archivos y ejecutables dentro de la carpeta raíz de este proyecto están bajo la licencia MIT,
+como especificada en el archivo LICENSE.
 
-Se usó la librería blessings para la manipulación de la consola:
+Se usó la librería blessed para la manipulación de la consola:
 {term.link('https://github.com/jquast/blessed', 'Blessed en GitHub')}
 """
 
@@ -352,5 +366,29 @@ class CreditsScreen:
             for line in SUDOKU_TITLE_SMALL.splitlines():
                 print(term.center(line))
             for line in credit_text.splitlines():
+                print(term.center(line))
+            term.inkey()
+
+rules_text = r"""
+#############################
+¿CÓMO JUGAR SUDOKU?
+#############################
+
+El Sudoku es un juego de lógica. Consiste en un tablero de 9 por 9 celdas,
+donde pueden existir números del 1 al 9. El objetivo es llenar el tablero,
+de manera que ninguna celda quede vacía. Sin embargo, no es tan simple como
+parece, ya que cada celda tiene que cumplir con tres reglas fundamentales:
+
+1. No se pueden repetir números en el mismo renglón.
+2. No se pueden repetir números en la misma columna
+3. No se pueden repetir números dentro del mismo cuadrado 3 por 3.
+"""
+
+class RulesScreen:
+    """Reglas del Sudoku."""
+    def render(self):
+        with term.location(), term.hidden_cursor(), term.cbreak(), term.fullscreen():
+            print(term.home + term.clear)
+            for line in rules_text.splitlines():
                 print(term.center(line))
             term.inkey()

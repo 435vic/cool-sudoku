@@ -86,7 +86,7 @@ class Sudoku():
         self.remove_random_squares(squares)
 
     def recursive_solve(self, col, row):
-        """Resuelve el tablero de sudoku recursivamente, retornando verdadero al terminar."""
+        """Resuelve el tablero de sudoku recursivamente mediante backtracking, retornando verdadero al terminar."""
         for n in range(1, self.size+1):
             if self.check_safe(col, row, n):
                 # Este numero está bien, ponerlo en el tablero
@@ -100,7 +100,7 @@ class Sudoku():
                 # El camino adelante fue el correcto! Terminamos
                 if is_path_safe:
                     return True
-
+        # Sólo se llega a este punto si se intentaron todos los números posibles y todos eran incorrectos
         # La ruta tomada no fue correcta, tenemos que irnos para atrás
         self.set_cell(col, row, 0) # borrar la celda, estaba mal
         return False # Indicamos que hubo un error
