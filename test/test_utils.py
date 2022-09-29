@@ -48,10 +48,6 @@ class TestInterpolate(unittest.TestCase):
 
 class TestFormatTime(unittest.TestCase):
     def test_format(self):
-    # format_time(100) -> 1:40
-    # format_time(61) -> 1:01
-    # format_time(600) -> 10:00
-    # format_time(3700) -> 1:01:40
         cases = {
             100: '1:40',
             61: '1:01',
@@ -61,7 +57,6 @@ class TestFormatTime(unittest.TestCase):
             2: '0:02'
         }
         for (case, expected) in cases.items():
-            # pylint: disable-next=no-member
             self.assertEqual(utils.format_time(case), expected)
 
 if __name__ == '__main__':

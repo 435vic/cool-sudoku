@@ -309,6 +309,23 @@ class Sudoku():
         grid.append(final_row)
         return grid
 
+
+    @staticmethod
+    def from_str(grade, string):
+        """Genera un tablero de sudoku a partir de un string. El caracter n estará en la posición (n%size, n//size).
+        Todos los caracteres especificados serán los predeterminados."""
+        if len(string) != grade**4:
+            raise ValueError("El string no tiene la cantidad de elementos correcto.")
+        sudoku = Sudoku(grade)
+        for idx, c in enumerate(string):
+            col, row = idx%grade**2, idx//grade**2
+            n = 0 if c == '.' else CHAR_FONTS['alpha'].index(c)
+            sudoku.given[row][col] = n
+            sudoku.content[row][col] = n
+        return sudoku
+
+
+
 def main():
     """Función de prueba"""
     sud = Sudoku()

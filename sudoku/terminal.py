@@ -80,6 +80,14 @@ class Select:
                         print(term.move_up() + term.move_right(len(text)) + term.red + 'Cancelado' + term.normal)
                     return None
 
+if __name__ == '__main__':
+    seleccion = Select({
+        'a': 'Opción 1',
+        'b': 'Opción 2',
+        'c': 'Opción 3'
+    }).prompt('Elige una opción: ', default=1)
+    print(seleccion)
+
 # term = Terminal()
 
 # with term.cbreak(), term.hidden_cursor():
