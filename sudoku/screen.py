@@ -26,8 +26,8 @@ class SudokuScreen():
         self.start_time = None # None indica que el sudoku no se ha generado
         # Si el Sudoku fue completado
         self.completed = False
-        # Solo verificar los números al presionar una tecla
-        self.show_feedback = True
+        # Si verificar los números al presionar una tecla
+        self.show_feedback = False
         # El sudoku
         self.sudoku = Sudoku(grade, difficulty)
         (sudoku_width, sudoku_height) = self.sudoku.rendered_size()
@@ -67,6 +67,7 @@ class SudokuScreen():
             sys.stdout.write(term.move_xy(col, row))
             # Dibujar título
             self.draw_title()
+            self.draw_controls()
 
             while True:
                 # Si se completó el sudoku salir
@@ -75,8 +76,16 @@ class SudokuScreen():
                 # En caso de que la consola cambió de tamaño volvemos a dibujar todo
                 if self.changed_size():
                     sys.stdout.write(term.clear)
+                    # Actualizar la variable con la posición del sudoku
+                    sudoku_width, sudoku_height = self.sudoku.rendered_size()
+                    self.sudoku_home = (
+                        (self.term_width - sudoku_width) // 2,
+                        (self.term_height - sudoku_height) // 2
+                    )
                     # Dibujar título
                     self.draw_title()
+                    # Dibujar controles
+                    self.draw_controls()
                     self.draw_sudoku()
                     col, row = self.cursor_pos
                     x, y = self.calc_cursor_pos(col, row)
@@ -313,6 +322,23 @@ class SudokuScreen():
             sys.stdout.write(term.center(text))
             sys.stdout.flush()
 
+    def draw_controls(self):
+        """Renderiza los controles del juego a la pantalla en caso de que quepa."""
+        controls_height = len(controls_text.splitlines())
+        # Conseguir la línea del texto con la mayor cantidad de caracteres
+        controls_width = len(max(controls_text.splitlines(), key=len))
+        sudoku_width, _ = self.sudoku.rendered_size()
+        free_space_start = self.sudoku_home[0]+sudoku_width
+        free_space = self.term_width-(free_space_start)
+        if controls_width <= (free_space) and controls_height <= self.term_height:
+            with term.location():
+                sys.stdout.write(term.home+term.move_down((self.term_height-controls_height)//2))
+                controls_start = free_space_start + (free_space-controls_width)//2
+                for line in controls_text.splitlines():
+                    sys.stdout.write(term.move_right(controls_start) + line + '\n')
+                sys.stdout.flush()
+
+
     def clear_subtitle(self):
         """Borra el subtítulo de la pantalla."""
         with term.location(), term.hidden_cursor():
@@ -350,7 +376,7 @@ del | backspace  borrar celda
 Shift + wasd     siguiente celda
 Shift + del      borrar
 q                salir
-"""[1:]
+{term.normal}"""[1:]
 
 credit_text = f"""
 por Victor Quintana - A10643020@tec.mx

@@ -11,6 +11,7 @@ from sudoku.characters import CHAR_FONTS
 class TestSudoku(unittest.TestCase):
     def test_gen_from_str(self):
         """Verifica que se puede generar un tablero a partir de un String."""
+        print('\n\n', '='*10, 'TEST GENERACION DE SUDOKU', '='*10)
         # Hace la misma prueba tres veces por cada tamaño soportado de Sudoku
         for grade in [2, 2, 2, 3, 3, 3, 4, 4, 4]:
             size = grade**2
@@ -20,12 +21,16 @@ class TestSudoku(unittest.TestCase):
                 col, row = i%size, i//size
                 grid[row][col] = n
             source = ''.join([CHAR_FONTS['alpha'][n] for n in nums]).replace(' ', '.')
-            sud = Sudoku.from_str(grade, source)
-            self.assertEqual(grid, sud.content)
-            self.assertEqual(grid, sud.given)
+            sudoku = Sudoku.from_str(grade, source)
+            print(f'String: {source}')
+            print('Sudoku generado')
+            print('\n'.join(sudoku.render()))
+            self.assertEqual(grid, sudoku.content)
+            self.assertEqual(grid, sudoku.given)
 
     def test_check_safe(self):
         """Revisa que el sudoku pueda correctamente detectar números incorrectos."""
+        print('\n\n', '='*10, 'TEST CHECAR NUMERO SEGURO', '='*10)
         # Los casos de prueba.
         # Elemento 0: tablero
         # Elemento 1: grado del tablero
@@ -58,15 +63,18 @@ class TestSudoku(unittest.TestCase):
             grade = case.pop(0)
             sudoku = Sudoku.from_str(grade, source)
             render = '\n'.join(sudoku.render())
+            print('Sudoku:', render, sep='\n')
             for test in case.pop(0):
                 col, row = test.pop(0) # coordenadas
                 num = test.pop(0) # número a probar
                 expected = test.pop(0) # Resultado esperado de la función
+                print(f'Colocar {num} en {col}, {row}, se espera {expected}: {sudoku.check_safe(col, row, num)}')
                 self.assertEqual(sudoku.check_safe(col, row, num), expected,
                 msg=f'Safe check failed on col {col}, row {row} with num {num} (expected {expected}, got {sudoku.check_safe(col, row, num)})\n{render}')
 
     def test_is_solved(self):
         """Verifica que la funcion `is_solved` del sudoku funciona y correctamente identifica tableros resueltos y no resueltos."""
+        print('\n\n', '='*10, 'TEST SUDOKU RESUELTO', '='*10)
         cases = (
             ['534678912672195348198342567859761423426853791713924856961537284287419635345286179', 3, True],
             ['53467891267219534819834256785976142342685379171392485696.537284287419635345286179', 3, False],
@@ -79,4 +87,8 @@ class TestSudoku(unittest.TestCase):
             grade = case.pop(0)
             sudoku = Sudoku.from_str(grade, source)
             render = '\n'.join(sudoku.render())
-            self.assertEqual(sudoku.is_solved(), case.pop(0), msg=render)
+            expected = case.pop(0)
+            solved = sudoku.is_solved()
+            print(f'Sudoku resuelto (valor esperado): {expected}', render, sep='\n')
+            print(f'Valor actual: {solved}')
+            self.assertEqual(solved, expected, msg=render)
