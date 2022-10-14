@@ -394,6 +394,7 @@ Se usó la librería blessed para la manipulación de la consola:
 class CreditsScreen:
     """Créditos del programa."""
     def render(self):
+        """Dibujar los créditos."""
         with term.location(), term.hidden_cursor(), term.cbreak(), term.fullscreen():
             print(term.home + term.clear)
             for line in SUDOKU_TITLE_SMALL.splitlines():
@@ -420,6 +421,7 @@ parece, ya que cada celda tiene que cumplir con tres reglas fundamentales:
 class RulesScreen:
     """Reglas del Sudoku."""
     def render(self):
+        """Dibujar las reglas del Sudoku."""
         with term.location(), term.hidden_cursor(), term.cbreak(), term.fullscreen():
             print(term.home + term.clear)
             for line in rules_text.splitlines():
