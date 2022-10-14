@@ -318,7 +318,8 @@ class SudokuScreen():
         """Dibuja un texto de subtítulo en la parte inferior de la pantalla."""
         with term.location(), term.hidden_cursor():
             # El texto debe de estar a la mitad del espacio entre el sudoku y el borde inferior de la consola
-            sys.stdout.write(term.home + term.move_down(term.height - (term.height - self.sudoku.rendered_size()[1])//4 - 1))
+            x_pos = term.height - (term.height - self.sudoku.rendered_size()[1])//4 - 1
+            sys.stdout.write(term.home + term.move_down(x_pos))
             sys.stdout.write(term.center(text))
             sys.stdout.flush()
 
@@ -342,7 +343,8 @@ class SudokuScreen():
     def clear_subtitle(self):
         """Borra el subtítulo de la pantalla."""
         with term.location(), term.hidden_cursor():
-            sys.stdout.write(term.home + term.move_down(term.height - (term.height - self.sudoku.rendered_size()[1])//4))
+            x_pos = term.height - (term.height - self.sudoku.rendered_size()[1])//4
+            sys.stdout.write(term.home + term.move_down(x_pos))
             sys.stdout.write(term.clear_eol)
 
     def changed_size(self):
