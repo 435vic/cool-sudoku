@@ -4,5 +4,6 @@ Lib
 Scripts
 
 *.pyc
+*.zip
 
 pyvenv.cfg

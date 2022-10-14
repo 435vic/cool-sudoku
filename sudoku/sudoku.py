@@ -13,7 +13,7 @@ class Sudoku():
         self.grade = grade
         # Tamaño total del sudoku, en celdas.
         self.size = self.grade**2
-        # Contenido del sudoku, una matrix del tamaño self.size, con números del 0 al 9. 0 representa una celda vacía.
+        # Contenido del sudoku, una matriz del tamaño self.size, con números del 0 al 9. 0 representa una celda vacía.
         self.content = [[0 for _ in range(self.size)] for _ in range(self.size)]
         # Los números predeterminados del sudoku, no se pueden cambiar
         self.given = [[0 for _ in range(self.size)] for _ in range(self.size)]
