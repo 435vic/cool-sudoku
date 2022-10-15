@@ -59,7 +59,7 @@ def main():
 
     # Borrar el título
     print(term.move_up(len(title.splitlines())+1) + term.clear_eos, end='', flush=True)
-    print("¡Gracias por jugar Sudoku! Tu cerebro te lo agradecerá :)")
+    print('¡Gracias por jugar Sudoku! Tu cerebro te lo agradecerá :)')
 
 if __name__ == '__main__':
     main()

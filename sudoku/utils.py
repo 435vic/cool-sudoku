@@ -3,9 +3,12 @@
 from blessed import Terminal
 
 def pad(text, length, alignment='center', pad_char=' '):
-    """Le pone padding a un texto. Toma como argumentos el texto, la longitud deseada y la alineación,
-       La cual puede ser `left`, `right` o `center`. Regresa el texto, con padding de `center` si el valor
-       no es especificado o válido. El último argumento es el caracter con el que se desea espaciar el texto."""
+    """Le pone padding a un texto. Toma como argumentos el texto,
+       la longitud deseada y la alineación, la cual puede ser
+       `left`, `right` o `center`. Regresa el texto, con padding de
+       `center` si el valor no es especificado o válido.
+
+       El último argumento es el caracter con el que se desea espaciar el texto."""
     # El valor mímino es la longitud del texto
     if length < len(text): length = len(text)
     pad_text = pad_char*(length-len(text))
@@ -38,7 +41,8 @@ def is_key_directional(key):
     return key.lower() in ['w', 'a', 's', 'd']
 
 def format_time(t):
-    """Formatea los segundos proporcionados en el formato hh:mm:ss, con las siguientes características:
+    """Formatea los segundos proporcionados en el formato hh:mm:ss,
+    con las siguientes características:
 
     - Si la hora es 0, esconder
     - Si los minutos son menores a 10, se imprime sin el cero antes
@@ -52,14 +56,19 @@ def format_time(t):
     secs = t % 60
     mins = (t // 60) % 60
     hrs = t // 60 // 60
-    return f"{f'{hrs}:' if hrs > 0 else ''}{'0' if mins < 10 and hrs > 0 else ''}{mins}:{'0' if secs < 10 else ''}{secs}"
+    hrs_txt = f'{hrs}' if hrs > 0 else ''
+    mins_txt = f"{'0' if mins < 10 and hrs > 0 else ''}{mins}"
+    secs_txt = f"{'0' if secs < 10 else ''}{secs}"
+    return f"{hrs_txt}:{mins_txt}:{secs_txt}"
 
 def pause(prompt=None, timeout=None):
-    """Pausa el programa hasta que una tecla es presionada. Equivalente al comando `pause` en Windows.
+    """Pausa el programa hasta que una tecla es presionada.
+    Equivalente al comando `pause` en Windows.
 
     Recibe un argumento `prompt` que es el texto que se imprimirá antes de esperar a una tecla.
 
-    Opcionalmente, se puede proporcinar un `timeout` en segundos, que se esperará antes de continuar con el programa
+    Opcionalmente, se puede proporcinar un `timeout` en segundos,
+    que se esperará antes de continuar con el programa
     en caso de que no se reciban teclas."""
     term = Terminal()
     with term.cbreak(), term.hidden_cursor():

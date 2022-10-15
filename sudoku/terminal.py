@@ -11,8 +11,9 @@ class Select:
     """Menú de selección.
 
     Argumentos:
-    options (dict(str, str)): Diccionario de opciones. La llave representa una identificación, y el valor lo que se
-    mostrará en esa opción.
+    options (dict(str, str)): Diccionario de opciones.
+    La llave representa una identificación,
+    y el valor lo que se mostrará en esa opción.
     """
 
     def __init__(self, options):
@@ -43,7 +44,8 @@ class Select:
         Argumentos:
         text (str): El prompt.
         default (int): El item que estará seleccionado al inicio (default: 0)
-        erase_after_use (boolean): Si después de elegir la opción, dejar la línea con la selección (False) o eliminarla (True)
+        erase_after_use (boolean): Si después de elegir la opción,
+        dejar la línea con la selección (False) o eliminarla (True)
 
         Retorna: La opción seleccionada."""
         # Preparar la consola para recibir teclas individuales, y esconder el cursor
@@ -71,13 +73,22 @@ class Select:
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
                     print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='')
                     if not erase_after_use:
-                        print(term.move_up() + term.move_right(len(text)) + term.aqua + list(self.options.values())[index] + term.normal)
+                        print(term.move_up() +
+                              term.move_right(len(text)) +
+                              term.aqua + list(self.options.values())[index]
+                              + term.normal)
                     return list(self.options.keys())[index]
                 elif key.name == 'KEY_ESCAPE' or key == 'q':
                     # Regresar al principio y reemplazar todo para sólo dejar la selección
-                    print(term.move_up(len(self.options)+2+erase_after_use)+term.clear_eos, end='', flush=True)
+                    print(term.move_up(
+                          len(self.options) +
+                          2+erase_after_use) +
+                          term.clear_eos,
+                        end='', flush=True)
                     if not erase_after_use:
-                        print(term.move_up() + term.move_right(len(text)) + term.red + 'Cancelado' + term.normal)
+                        print(term.move_up() +
+                              term.move_right(len(text)) +
+                              term.red('Cancelado'))
                     return None
 
 if __name__ == '__main__':
@@ -87,14 +98,3 @@ if __name__ == '__main__':
         'c': 'Opción 3'
     }).prompt('Elige una opción: ', default=1)
     print(seleccion)
-
-# term = Terminal()
-
-# with term.cbreak(), term.hidden_cursor():
-#     print("Testing!")
-#     print("Testing!")
-#     print("(press q to quit)", end='')
-#     sys.stdout.flush()
-#     while (val := term.inkey()).lower() != 'q':
-#         pass
-#     print((term.clear_bol+term.move_up)*3+"\n")

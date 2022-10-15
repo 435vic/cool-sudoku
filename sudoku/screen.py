@@ -17,11 +17,14 @@ class SudokuScreen():
         self.term_height = term.height
         self.grade = grade
         self.difficulty = difficulty
-        self.cursor_pos = (0, 0) # La posición del cursor respectivo a las celdas del Sudoku.
+        # La posición del cursor respectivo a las celdas del Sudoku.
+        self.cursor_pos = (0, 0)
         # Bandera que indica si se editó una celda.
-        # Se utiliza para que el número se guarde hasta mover el cursor o presionar enter.
+        # Se utiliza para que el número se guarde
+        # hasta mover el cursor o presionar enter.
         self.edited_cell = False
-        # El tiempo de inicio. Se usará para medir el tiempo que toma el usuario en resolver el Sudoku
+        # El tiempo de inicio. Se usará para medir el tiempo
+        # que toma el usuario en resolver el Sudoku.
         # Se empezará a medir en cuanto se genere el Sudoku
         self.start_time = None # None indica que el sudoku no se ha generado
         # Si el Sudoku fue completado
@@ -31,8 +34,8 @@ class SudokuScreen():
         # El sudoku
         self.sudoku = Sudoku(grade, difficulty)
         (sudoku_width, sudoku_height) = self.sudoku.rendered_size()
-        # Esta variable guarda la posición de la esquina superior izquierda del Sudoku.
-        # La posición default es exactamente en el centro de la pantalla
+        # Esta variable guarda la posición de la esquina superior izquierda del
+        # Sudoku.La posición default es exactamente en el centro de la pantalla
         self.sudoku_home = (
             (self.term_width - sudoku_width) // 2,
             (self.term_height - sudoku_height) // 2
@@ -53,16 +56,20 @@ class SudokuScreen():
         with term.fullscreen(), term.cbreak():
             self.draw_sudoku(numbers=False) # Dibujamos sólo la cuadrícula
             self.draw_subtitle('Cargando...')
-            # Generamos un nuevo sudoku aleatorio, quitamos el mensaje de cargar, y actualizamos la pantalla
+            # Generamos un nuevo sudoku aleatorio, quitamos el
+            # mensaje de cargar, y actualizamos la pantalla
             self.sudoku.generate_sudoku()
-            # Se terminó de generar, y el usuario podrá empezar a editarlo. Empezamos el tiempo
+            # Se terminó de generar, y el usuario podrá empezar a editarlo.
+            # Empezamos el tiempo
             self.start_time = int(time.time())
             self.clear_subtitle()
             self.draw_sudoku(grid=False) # Dibujamos sólo los números del Sudoku
-            # Mover el cursor a la primera celda modificable, para el punto de partida del cursor
+            # Mover el cursor a la primera celda modificable,
+            # para el punto de partida del cursor
             col, row = self.sudoku.get_next_modifiable_cell(0, 0, 1, True)
             self.cursor_pos = [col, row]
-            # Calculamos las coordenadas reales del cursor si estuviera en la celda que calculamos
+            # Calculamos las coordenadas reales del cursor si
+            # estuviera en la celda que calculamos
             col, row = self.calc_cursor_pos(col, row)
             sys.stdout.write(term.move_xy(col, row))
             # Dibujar título
@@ -95,10 +102,15 @@ class SudokuScreen():
                 self.render_status_bar()
 
                 ##### CONTROLES #####
-                # Esta sección se dedica a lidiar con las teclas del usuario, para manipular e interactuar con el juego
-                key = term.inkey(1) # Si nada se presiona, la pantalla se refrescará cada segundo
-                # Si la tecla presionada es un número, sea del teclado principal o el keypad
-                if (n := key).isnumeric() or (n := key).replace('KEY_KP_', '').isnumeric():
+                # Esta sección se dedica a lidiar con las teclas del usuario,
+                # para manipular e interactuar con el juego
+                # Si nada se presiona, la pantalla se refrescará cada segundo
+                # para mostrar el tiempo transcurrido.
+                key = term.inkey(1)
+                # Si la tecla presionada es un número,
+                # sea del teclado principal o el keypad
+                if (n := key).isnumeric() or\
+                   (n := key).replace('KEY_KP_', '').isnumeric():
                     num = int(n)
                     if num > self.sudoku.size:
                         continue # El número está fuera de rango
@@ -113,10 +125,12 @@ class SudokuScreen():
                 elif is_key_directional(key):
                     self.update_numbers(col, row)
                     col, row = self.handle_move(key)
-                    # Hacemos flush para que el cursor se mueva immediatamente, y no tengamos que renderizar todo
-                    # el tablero cada vez que cambiemos celda
+                    # Hacemos flush para que el cursor se mueva immediatamente,
+                    # y no tengamos que renderizar todo el tablero
+                    # cada vez que cambiemos celda
                     self.move_cursor_to(col, row, flush=True)
-                # En caso de presionar Backspace o Delete, borrar la celda y actualizar el estado interno
+                # En caso de presionar Backspace o Delete, borrar la celda
+                # y actualizar el estado interno
                 elif key.code in (term.KEY_BACKSPACE, term.KEY_DELETE):
                     col, row = self.cursor_pos
                     # Cambiar el número en el tablero si es modificable
@@ -125,7 +139,8 @@ class SudokuScreen():
                     self.write_number(0)
                     self.edited_cell = True
                     self.update_numbers(col, row)
-                # Shift+Delete borra todo el tablero, regresándolo a su estado inicial
+                # Shift+Delete borra todo el tablero,
+                # regresándolo a su estado inicial
                 elif key.code == term.KEY_SDC:
                     # Borrar todo el tablero
                     for i in range(self.sudoku.size):
@@ -134,7 +149,8 @@ class SudokuScreen():
                             self.sudoku.correct[i][j] = None
                     # Redibujar
                     self.draw_sudoku(grid=False)
-                # La tecla Enter guarda el valor de la celda y comunica si estaba correcto o incorrecto
+                # La tecla Enter guarda el valor de la celda y comunica
+                # si estaba correcto o incorrecto
                 elif key.code == term.KEY_ENTER:
                     self.update_numbers(col, row)
                     col, row = self.cursor_pos
@@ -150,16 +166,20 @@ class SudokuScreen():
                 if not self.show_feedback and self.check_full() and self.sudoku.is_solved():
                     self.on_completion()
 
-        self.stop()
-
     def render_status_bar(self):
-        """Dibuja el texto de la barra de abajo, con información sobre el sudoku, su dificultad y el tiempo transcurrido."""
+        """Dibuja el texto de la barra de abajo, con información sobre
+        el sudoku, su dificultad y el tiempo transcurrido."""
         difficulty = 'Fácil'
         if self.sudoku.difficulty >= .75:
             difficulty = 'Difícil'
         elif self.sudoku.difficulty >= .5:
             difficulty = 'Intermedio'
-        subtitle = f"{self.sudoku.size}x{self.sudoku.size} | Dificultad: {difficulty} | {self.get_formatted_time()}"
+        elements = [
+            f'{self.sudoku.size}x{self.sudoku.size}',
+            f'Dificultad: {difficulty}',
+            f'{self.get_formatted_time()}'
+        ]
+        subtitle = ' | '.join(elements)
         self.draw_subtitle(term.dimgray(subtitle))
 
     def render_controls(self):
@@ -167,7 +187,8 @@ class SudokuScreen():
 
 
     def check_full(self):
-        """Verifica si el tablero está lleno. Esta función está semi optimizada para su uso constante."""
+        """Verifica si el tablero está lleno. Esta función está
+        semi optimizada para su uso constante."""
         # Tenemos dos punteros, uno al principio y uno al final
         # Cada ciclo se acercan al centro, y apuntan a dos celdas de ambos lados
         # Esto divide a la mitad el tiempo requerido para verificar en el peor caso
@@ -222,7 +243,8 @@ class SudokuScreen():
         return x, y
 
     def move_cursor_to(self, x, y, flush=False):
-        """Mueve el cursor a la celda (x, y), calculando su posición real y haciendo flush a la consola si es especificado."""
+        """Mueve el cursor a la celda (x, y), calculando su posición real
+        y haciendo flush a la consola si es especificado."""
         self.cursor_pos = [x, y]
         col, row = self.calc_cursor_pos(x, y)
         sys.stdout.write(term.move_xy(col, row))
@@ -233,15 +255,21 @@ class SudokuScreen():
         """Renderiza el tablero de Sudoku a la pantalla."""
         with term.location(), term.hidden_cursor():
             (sudoku_width, sudoku_height) = self.sudoku.rendered_size()
-            with term.hidden_cursor():
-                # Imprimir un error si el tablero de sudoku no cabe en la consola
-                if sudoku_height > self.term_height or sudoku_width > self.term_width:
-                    sys.stdout.write(term.home + term.clear + term.move_down(term.height//2 - 1))
-                    sys.stdout.write(term.center(term.red('ERROR ') + 'La consola es demasiado pequeña para dibujar el tablero.'))
-                    sys.stdout.write(term.center(f'Favor de extender la consola al menos {sudoku_height-self.term_height} filas'))
-                    sys.stdout.flush()
-                    time.sleep(1)
-                    return
+            # Imprimir un error si el tablero de sudoku no cabe en la consola
+            if sudoku_height > self.term_height or sudoku_width > self.term_width:
+                sys.stdout.write(
+                    term.home +
+                    term.clear +
+                    term.move_down(term.height//2 - 1))
+                sys.stdout.write(
+                    term.center(term.red('ERROR ') +
+                    'La consola es demasiado pequeña para dibujar el tablero.'))
+                min_height = sudoku_height-self.term_height
+                sys.stdout.write(term.center(
+                    f'Favor de extender la consola al menos {min_height} filas'))
+                sys.stdout.flush()
+                time.sleep(1)
+                return
             if self.changed_size():
                 # Las dimensiones de la consola cambiaron, volver a dibujar
                 sys.stdout.write(term.clear)
@@ -250,8 +278,9 @@ class SudokuScreen():
                 sys.stdout.write(term.move_down(self.sudoku_home[1]))
                 # Imprimir tablero vacío
                 for line in self.sudoku.render(show_nums=False):
-                    sys.stdout.write('\r' + term.move_right(self.sudoku_home[0]) + line + '\n')
-
+                    sys.stdout.write('\r' +
+                                     term.move_right(self.sudoku_home[0]) +
+                                     line + '\n')
             if numbers:
                 # Mover el cursor a la primera celda
                 sys.stdout.write(term.home)
@@ -261,11 +290,13 @@ class SudokuScreen():
                     for j in range(self.sudoku.size):
                         (cell_x, cell_y) = self.calc_cursor_pos(j, i)
                         sys.stdout.write(term.move_xy(cell_x, cell_y))
-                        # Mantener un inventario de las celdas, para checar si todo el tablero está correcto
+                        # Mantener un inventario de las celdas,
+                        # para checar si todo el tablero está correcto
                         cell_correct = self.sudoku.correct[i][j]
                         # Verificar si la celda no está vacía
                         full = full and self.sudoku.content[i][j] != 0
-                        # Es el número en esta celda uno predeterminado o escrito por el usuario?
+                        # Es el número en esta celda uno predeterminado
+                        # o escrito por el usuario?
                         if (n := self.sudoku.given[i][j]) == 0:
                             n = self.sudoku.content[i][j]
                             color = term.normal
@@ -273,13 +304,16 @@ class SudokuScreen():
                                 color = term.palegreen
                             elif cell_correct is False and self.show_feedback:
                                 color = term.lightcoral
-                            sys.stdout.write(color + CHAR_FONTS['alpha'][n] + term.normal)
+                            sys.stdout.write(color +
+                                             CHAR_FONTS['alpha'][n] +
+                                             term.normal)
                         else:
                             color = term.slategray4
                             if cell_correct is False and self.show_feedback:
                                 color = term.firebrick4
-                            sys.stdout.write(color + CHAR_FONTS['alpha'][n] + term.normal)
-
+                            sys.stdout.write(color +
+                                             CHAR_FONTS['alpha'][n] +
+                                             term.normal)
                 if full:
                     if self.sudoku.is_solved():
                         with term.hidden_cursor():
@@ -293,9 +327,12 @@ class SudokuScreen():
         sys.stdout.write(term.home)
         sys.stdout.write(term.move_down(self.sudoku_home[1]))
         for line in self.sudoku.render():
-            # Regresar al principio de la línea, llegar hasta la coordenada x del sudoku, e imprimir
-            sys.stdout.write('\r' + term.move_right(self.sudoku_home[0]) + term.green(line) + '\n')
-        # finish_time = self.get_time()
+            # Regresar al principio de la línea, llegar hasta
+            # la coordenada x del sudoku, e imprimir
+            sys.stdout.write('\r' +
+                             term.move_right(self.sudoku_home[0]) +
+                             term.green(line) +
+                             '\n')
         pause()
         self.completed = True
 
@@ -309,7 +346,8 @@ class SudokuScreen():
         with term.location(), term.hidden_cursor():
             if title_height <= (self.sudoku_home[1]) - 1:
                 sys.stdout.write(term.home)
-                sys.stdout.write(term.move_down((self.sudoku_home[1]//2 - title_height//2) - 1))
+                title_y = (self.sudoku_home[1]//2 - title_height//2) - 1
+                sys.stdout.write(term.move_down(title_y))
                 for line in SUDOKU_TITLE_INGAME.splitlines():
                     sys.stdout.write(term.center(line))
                 sys.stdout.flush()
@@ -317,9 +355,11 @@ class SudokuScreen():
     def draw_subtitle(self, text):
         """Dibuja un texto de subtítulo en la parte inferior de la pantalla."""
         with term.location(), term.hidden_cursor():
-            # El texto debe de estar a la mitad del espacio entre el sudoku y el borde inferior de la consola
-            x_pos = term.height - (term.height - self.sudoku.rendered_size()[1])//4 - 1
-            sys.stdout.write(term.home + term.move_down(x_pos))
+            # El texto debe de estar a la mitad del espacio entre el
+            # sudoku y el borde inferior de la consola
+            y_pos = term.height - \
+                    (term.height - self.sudoku.rendered_size()[1])//4 - 1
+            sys.stdout.write(term.home + term.move_down(y_pos))
             sys.stdout.write(term.center(text))
             sys.stdout.flush()
 
@@ -331,20 +371,26 @@ class SudokuScreen():
         sudoku_width, _ = self.sudoku.rendered_size()
         free_space_start = self.sudoku_home[0]+sudoku_width
         free_space = self.term_width-(free_space_start)
-        if controls_width <= (free_space) and controls_height <= self.term_height:
+        if controls_width <= (free_space) and \
+           controls_height <= self.term_height:
+           # Dibujar los controles y regresar a la posición original
             with term.location():
-                sys.stdout.write(term.home+term.move_down((self.term_height-controls_height)//2))
+                y_pos = (self.term_height-controls_height)//2
+                sys.stdout.write(term.home+term.move_down(y_pos))
                 controls_start = free_space_start + (free_space-controls_width)//2
                 for line in controls_text.splitlines():
-                    sys.stdout.write(term.move_right(controls_start) + line + '\n')
+                    sys.stdout.write(
+                        term.move_right(controls_start) +
+                        line + '\n'
+                    )
                 sys.stdout.flush()
-
 
     def clear_subtitle(self):
         """Borra el subtítulo de la pantalla."""
         with term.location(), term.hidden_cursor():
-            x_pos = term.height - (term.height - self.sudoku.rendered_size()[1])//4
-            sys.stdout.write(term.home + term.move_down(x_pos))
+            y_pos = term.height - \
+                (term.height - self.sudoku.rendered_size()[1])//4
+            sys.stdout.write(term.home + term.move_down(y_pos))
             sys.stdout.write(term.clear_eol)
 
     def changed_size(self):
@@ -360,13 +406,9 @@ class SudokuScreen():
         return False
 
     def calc_cursor_pos(self, x, y):
-        """Regresa la posición del cursor si estuviera en la celda Sudoku x, y. La celda 0, 0 tiene la posición 0,0."""
+        """Regresa la posición del cursor si estuviera en la celda Sudoku x, y.
+        La celda 0, 0 tiene la posición 0, 0."""
         return (x*4 + self.sudoku_home[0]+2, y*2 + self.sudoku_home[1]+1)
-
-    # pylint: disable=missing-function-docstring
-    def stop(self):
-        pass
-        # print("done!")
 
 controls_text = f"""
 ┏━━━━━━━━━━━━━━━━━┓
@@ -395,7 +437,8 @@ class CreditsScreen:
     """Créditos del programa."""
     def render(self):
         """Dibujar los créditos."""
-        with term.location(), term.hidden_cursor(), term.cbreak(), term.fullscreen():
+        with term.location(), term.hidden_cursor(),\
+             term.cbreak(), term.fullscreen():
             print(term.home + term.clear)
             for line in SUDOKU_TITLE_SMALL.splitlines():
                 print(term.center(line))
