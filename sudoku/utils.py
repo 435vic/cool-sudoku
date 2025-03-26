@@ -1,6 +1,6 @@
 """Funciones misceláneas de utilidad."""
 
-from blessed import Terminal
+from .terminal import get_terminal
 
 def pad(text, length, alignment='center', pad_char=' '):
     """Le pone padding a un texto. Toma como argumentos el texto,
@@ -35,7 +35,7 @@ def interpolate(n, out_start, out_end, in_start=0, in_end=1):
 
 def is_key_directional(key):
     """Si una tecla proporcionada es direccional. Incluye las flechas y WASD."""
-    term = Terminal()
+    term = get_terminal()
     if key.is_sequence:
         return key.code in [term.KEY_UP, term.KEY_DOWN, term.KEY_LEFT, term.KEY_RIGHT]
     return key.lower() in ['w', 'a', 's', 'd']
@@ -70,7 +70,7 @@ def pause(prompt=None, timeout=None):
     Opcionalmente, se puede proporcinar un `timeout` en segundos,
     que se esperará antes de continuar con el programa
     en caso de que no se reciban teclas."""
-    term = Terminal()
+    term = get_terminal()
     with term.cbreak(), term.hidden_cursor():
         if prompt is not None:
             print(prompt, end='', flush=True)

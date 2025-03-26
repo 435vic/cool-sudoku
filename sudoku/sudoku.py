@@ -331,7 +331,7 @@ class Sudoku():
                 else:
                     # Si esta columna está en una línea vertical mayor:
                     # ┠ si es la primera o ╂ si no
-                    row[0] += boxchars['vrline'][0] if j == 0 else\
+                    row[0] += boxchars['vrline'][0] if j == 0 else \
                               boxchars['cross'][j%self.grade == 0]
                     row[0] += boxchars['hline'][0]*3
                 # La segunda fila tiene líneas verticales y espacios únicamente
